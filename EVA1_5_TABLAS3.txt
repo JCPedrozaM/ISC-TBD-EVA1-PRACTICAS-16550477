@@ -1,0 +1,90 @@
+EVA1_5_TABLAS3
+
+MySQL  localhost:3306  ejemplo  SQL > create table paises(
+                                   ... clave int not null primary key auto_increment,
+                                   ... nombre varchar(50) not null unique,
+                                   ... poblacion int default 1,
+                                   ... continente enum('Africa','America','Europa','Asia','Oceania'));
+Query OK, 0 rows affected (0.1519 sec)
+
+ MySQL  localhost:3306  ejemplo  SQL > insert into paises(nombre, poblacion, continente)
+                                   ... values('Mexico',12000000,'America');
+Query OK, 1 row affected (0.0478 sec)
+
+ MySQL  localhost:3306  ejemplo  SQL > insert into paises(nombre, poblacion, continente) values('Mexico',12000000,'America');
+ERROR: 1062 (23000): Duplicate entry 'Mexico' for key 'nombre'
+
+----------------------------------------------------------------
+agregar a la tabla personal un rfc con caracteristica unico
+--------------------------------------------------------------------
+
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > desc personal;
++--------------+-------------+------+-----+---------+-------+
+| Field        | Type        | Null | Key | Default | Extra |
++--------------+-------------+------+-----+---------+-------+
+| clave        | int(11)     | YES  |     | NULL    |       |
+| nombre       | varchar(50) | YES  |     | NULL    |       |
+| apellido     | varchar(50) | YES  |     | NULL    |       |
+| departamento | varchar(50) | YES  |     | NULL    |       |
+| salario      | float       | YES  |     | NULL    |       |
++--------------+-------------+------+-----+---------+-------+
+5 rows in set (0.0016 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > alter table personal add column rfc varchar(13) not null unique;
+ERROR: 1062 (23000): Duplicate entry '' for key 'rfc'
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > delete from * personal;
+ERROR: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '* personal' at line 1
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > truncate personal;
+Query OK, 0 rows affected (0.6886 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > select * from personal;
+Empty set (0.0498 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > alter table personal add column rfc varchar(13) not null unique;
+Query OK, 0 rows affected (1.4794 sec)
+
+Records: 0  Duplicates: 0  Warnings: 0
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > desc personal;
++--------------+-------------+------+-----+---------+-------+
+| Field        | Type        | Null | Key | Default | Extra |
++--------------+-------------+------+-----+---------+-------+
+| clave        | int(11)     | YES  |     | NULL    |       |
+| nombre       | varchar(50) | YES  |     | NULL    |       |
+| apellido     | varchar(50) | YES  |     | NULL    |       |
+| departamento | varchar(50) | YES  |     | NULL    |       |
+| salario      | float       | YES  |     | NULL    |       |
+| rfc          | varchar(13) | NO   | PRI | NULL    |       |
++--------------+-------------+------+-----+---------+-------+
+6 rows in set (0.0020 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL >
+
+
+-----------------------------------------------------------------------------------------------
+realizar ejercicio 10
+https://www.w3resource.com/mysql-exercises/create-table-exercises/
+
+
+ MySQL  localhost:3306  evaluacion_1 SQL > create table jobs(
+                                   ... job_id int not null primary key auto_increment,
+                                   ... job_title varchar(50) default '',
+                                   ... min_salary int default 8000,
+                                   ... max_salary int );
+Query OK, 0 rows affected (0.1265 sec)
+
+ MySQL  localhost:3306  evaluacion_1 SQL > desc jobs;
++------------+-------------+------+-----+---------+----------------+
+| Field      | Type        | Null | Key | Default | Extra          |
++------------+-------------+------+-----+---------+----------------+
+| job_id     | int(11)     | NO   | PRI | NULL    | auto_increment |
+| job_title  | varchar(50) | YES  |     |         |                |
+| min_salary | int(11)     | YES  |     | 8000    |                |
+| max_salary | int(11)     | YES  |     | NULL    |                |
++------------+-------------+------+-----+---------+----------------+
+4 rows in set (0.0043 sec)
+
+ MySQL  localhost:3306  evaluacion_1 SQL >

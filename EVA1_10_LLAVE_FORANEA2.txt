@@ -1,0 +1,611 @@
+EVA1_10_LLAVE_FORANEA2
+
+
+Crear un esquema para horarios
+	incluir alumnos, materias y carrera
+
+------------------------------------------------------------------------------------------------------------------------------
+
+
+MySQL Shell 8.0.12
+
+Copyright (c) 2016, 2018, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type '\help' or '\?' for help; '\quit' to exit.
+
+
+ MySQL  JS > \sql
+Switching to SQL mode... Commands end with ;
+
+ MySQL  SQL > \connect -c root@localhost
+The -c option is deprecated, please use --mysql or -mc instead
+Creating a Classic session to 'root@localhost'
+Please provide the password for 'root@localhost': *********
+Save password for 'root@localhost:3306'? [Y]es/[N]o/Ne[v]er (default No): y
+Fetching schema names for autocompletion... Press ^C to stop.
+Your MySQL connection id is 8
+Server version: 8.0.12 MySQL Community Server - GPL
+No default schema selected; type \use <schema> to set one.
+
+ MySQL  localhost:3306 ssl  SQL > \use evaluacion_1
+Default schema set to `evaluacion_1`.
+Fetching table and column names from `evaluacion_1` for auto-completion... Press ^C to stop.
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > desc productos;
++-------------+-------------+------+-----+---------+----------------+
+| Field       | Type        | Null | Key | Default | Extra          |
++-------------+-------------+------+-----+---------+----------------+
+| no_producto | int(11)     | NO   | PRI | NULL    | auto_increment |
+| nombre      | varchar(50) | YES  |     | NULL    |                |
+| precio      | float       | YES  |     | NULL    |                |
++-------------+-------------+------+-----+---------+----------------+
+3 rows in set (0.0019 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > create table factura_detalles(
+                                            ... clave int auto_increment primary key,
+                                            ... no_factura int constraint foreing key facturas(no_factura),
+                                            ... no_producto int constraint foreing key productos(no_producto),
+                                            ... cantidad int,
+                                            ... descuento float,
+                                            ... precio float);
+ERROR: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'constraint foreing key facturas(no_factura),
+no_producto int constraint foreing ' at line 3
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > create table factura_detalles(
+                                            ... clave int auto_increment primary key,
+                                            ... no_factura int,
+                                            ... no_producto int,
+                                            ... cantidad int,
+                                            ... descuento float,
+                                            ... precio float,
+                                            ... foreign key (no_factura) reference facturas(no_factura),
+                                            ... foreign key (no_producto) reference productos(no_producto));
+ERROR: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'reference facturas(no_factura),
+foreign key (no_producto) reference productos(no' at line 8
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > create table factura_detalles( clave int auto_increment primary key, no_factura int, no_producto int, cantidad int, descuento float, precio float, foreign key (no_factura) references facturas(no_factura), foreign key (no_producto) references productos(no_producto));
+Query OK, 0 rows affected (1.1568 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > select * from facturas;
++------------+---------------------+------------+
+| no_factura | fecha_compra        | no_cliente |
++------------+---------------------+------------+
+|          4 | 2018-09-12 00:00:00 |          3 |
++------------+---------------------+------------+
+1 row in set (0.0314 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > select * from productos;
+Empty set (0.0032 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > insert into productos(nombre,precio) values ('Manzanas',15), ('Peras',20),('Cocos',30),('Platanos',30);
+Query OK, 4 rows affected (0.2088 sec)
+
+Records: 4  Duplicates: 0  Warnings: 0
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > select * from productos;
++-------------+----------+--------+
+| no_producto | nombre   | precio |
++-------------+----------+--------+
+|           1 | Manzanas |     15 |
+|           2 | Peras    |     20 |
+|           3 | Cocos    |     30 |
+|           4 | Platanos |     30 |
++-------------+----------+--------+
+4 rows in set (0.0004 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > drop table factura_detalles;
+Query OK, 0 rows affected (0.6792 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > create table factura_detalles(
+                                            ... clave int auto_increment primary key,
+                                            ... no_factura int,
+                                            ... no_producto int,
+                                            ... cantidad int,
+                                            ... descuento float,
+                                            ... precio float,
+                                            ... foreign key(no_factura) references facturas(no_factura) on update cascade on delete cascade,
+                                            ... foreign key(no_producto) references productos(no_producto) on update cascade on delete restrict);
+Query OK, 0 rows affected (0.6959 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > select * from facturas;
++------------+---------------------+------------+
+| no_factura | fecha_compra        | no_cliente |
++------------+---------------------+------------+
+|          4 | 2018-09-12 00:00:00 |          3 |
++------------+---------------------+------------+
+1 row in set (0.0014 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > insert into factura_detalles(no_factura,no_producto,cantidad,precio)
+                                            ... values (4,1,100,15), (4,2,20,20), (4,3,50,30);
+Query OK, 3 rows affected (0.2092 sec)
+
+Records: 3  Duplicates: 0  Warnings: 0
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > select * from factura_detalles;
++-------+------------+-------------+----------+-----------+--------+
+| clave | no_factura | no_producto | cantidad | descuento | precio |
++-------+------------+-------------+----------+-----------+--------+
+|     1 |          4 |           1 |      100 |      NULL |     15 |
+|     2 |          4 |           2 |       20 |      NULL |     20 |
+|     3 |          4 |           3 |       50 |      NULL |     30 |
++-------+------------+-------------+----------+-----------+--------+
+3 rows in set (0.0005 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > update facturas
+                                            ... set
+                                            ... no_factura = 100
+                                            ... where no_facturas=4;
+ERROR: 1054 (42S22): Unknown column 'no_facturas' in 'where clause'
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > update facturas set no_factura = 100 where no_factura=4;
+Query OK, 1 row affected (0.1960 sec)
+
+Rows matched: 1  Changed: 1  Warnings: 0
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > select * from factura_detalles;
++-------+------------+-------------+----------+-----------+--------+
+| clave | no_factura | no_producto | cantidad | descuento | precio |
++-------+------------+-------------+----------+-----------+--------+
+|     1 |        100 |           1 |      100 |      NULL |     15 |
+|     2 |        100 |           2 |       20 |      NULL |     20 |
+|     3 |        100 |           3 |       50 |      NULL |     30 |
++-------+------------+-------------+----------+-----------+--------+
+3 rows in set (0.0004 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > delete from productos where no_producto=1;
+ERROR: 1451 (23000): Cannot delete or update a parent row: a foreign key constraint fails (`evaluacion_1`.`factura_detalles`, CONSTRAINT `factura_detalles_ibfk_2` FOREIGN KEY (`no_producto`) REFERENCES `productos` (`no_producto`) ON UPDATE CASCADE)
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > delete from facturas where no_factura=100;
+Query OK, 1 row affected (0.0994 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > select*from facturas;
+Empty set (0.0003 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > select*from factura_detalles;
+Empty set (0.0004 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > show tables;
++------------------------+
+| Tables_in_evaluacion_1 |
++------------------------+
+| carrera                |
+| clientes               |
+| compras                |
+| estudiantes            |
+| factura_detalles       |
+| facturas               |
+| horario                |
+| jobs                   |
+| materias               |
+| nueva_carrera          |
+| nueva_carrerota        |
+| paises                 |
+| personal               |
+| personal2              |
+| productos              |
++------------------------+
+15 rows in set (0.0016 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > desc horario;
++-----------------+-------------+------+-----+---------+-------+
+| Field           | Type        | Null | Key | Default | Extra |
++-----------------+-------------+------+-----+---------+-------+
+| materia         | varchar(50) | YES  |     | NULL    |       |
+| salon           | varchar(2)  | YES  |     | NULL    |       |
+| profesor        | varchar(50) | YES  |     | NULL    |       |
+| hora            | time        | YES  |     | NULL    |       |
+| dia             | date        | YES  |     | NULL    |       |
+| no_control      | varchar(20) | YES  |     | NULL    |       |
+| carrera         | varchar(3)  | YES  |     | NULL    |       |
+| creditos        | int(11)     | YES  |     | NULL    |       |
+| semestre_actual | int(11)     | YES  |     | NULL    |       |
++-----------------+-------------+------+-----+---------+-------+
+9 rows in set (0.0016 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL >
+
+
+--------------------------------------------------------------------------------------------
+
+
+MySQL Shell 8.0.12
+
+Copyright (c) 2016, 2018, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type '\help' or '\?' for help; '\quit' to exit.
+
+
+ MySQL  JS > \sql
+Switching to SQL mode... Commands end with ;
+
+ MySQL  SQL > \connect -c root@localhost
+The -c option is deprecated, please use --mysql or -mc instead
+Creating a Classic session to 'root@localhost'
+Please provide the password for 'root@localhost': *********
+Save password for 'root@localhost:3306'? [Y]es/[N]o/Ne[v]er (default No): y
+Fetching schema names for autocompletion... Press ^C to stop.
+Your MySQL connection id is 20
+Server version: 8.0.12 MySQL Community Server - GPL
+No default schema selected; type \use <schema> to set one.
+
+ MySQL  localhost:3306 ssl  SQL > \use evaluacion_1
+Default schema set to `evaluacion_1`.
+Fetching table and column names from `evaluacion_1` for auto-completion... Press ^C to stop.
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > show tables;
++------------------------+
+| Tables_in_evaluacion_1 |
++------------------------+
+| carrera                |
+| clientes               |
+| compras                |
+| estudiantes            |
+| factura_detalles       |
+| facturas               |
+| horario                |
+| jobs                   |
+| materias               |
+| nueva_carrera          |
+| nueva_carrerota        |
+| paises                 |
+| personal               |
+| personal2              |
+| productos              |
++------------------------+
+15 rows in set (0.0017 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > drop horario;
+ERROR: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'horario' at line 1
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > drop table horario;
+Query OK, 0 rows affected (0.3901 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > show tables;
++------------------------+
+| Tables_in_evaluacion_1 |
++------------------------+
+| carrera                |
+| clientes               |
+| compras                |
+| estudiantes            |
+| factura_detalles       |
+| facturas               |
+| jobs                   |
+| materias               |
+| nueva_carrera          |
+| nueva_carrerota        |
+| paises                 |
+| personal               |
+| personal2              |
+| productos              |
++------------------------+
+14 rows in set (0.0019 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > desc carrera;
++----------+-------------+------+-----+---------+-------+
+| Field    | Type        | Null | Key | Default | Extra |
++----------+-------------+------+-----+---------+-------+
+| nombre   | varchar(50) | NO   | PRI | NULL    |       |
+| creditos | int(11)     | YES  |     | NULL    |       |
+| semestre | int(11)     | YES  |     | NULL    |       |
+| area     | varchar(50) | NO   | PRI | NULL    |       |
++----------+-------------+------+-----+---------+-------+
+4 rows in set (0.0016 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > alter table carrera drop primary key;
+Query OK, 0 rows affected (1.4590 sec)
+
+Records: 0  Duplicates: 0  Warnings: 0
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > desc carrera;
++----------+-------------+------+-----+---------+-------+
+| Field    | Type        | Null | Key | Default | Extra |
++----------+-------------+------+-----+---------+-------+
+| nombre   | varchar(50) | NO   |     | NULL    |       |
+| creditos | int(11)     | YES  |     | NULL    |       |
+| semestre | int(11)     | YES  |     | NULL    |       |
+| area     | varchar(50) | NO   |     | NULL    |       |
++----------+-------------+------+-----+---------+-------+
+4 rows in set (0.0017 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > alter table carrera add column clave_carrera int auto_increment add constraint primary key;
+ERROR: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'add constraint primary key' at line 1
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > alter table carrera add column clave_carrera int;
+Query OK, 0 rows affected (0.5101 sec)
+
+Records: 0  Duplicates: 0  Warnings: 0
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > desc carrera;
++---------------+-------------+------+-----+---------+-------+
+| Field         | Type        | Null | Key | Default | Extra |
++---------------+-------------+------+-----+---------+-------+
+| nombre        | varchar(50) | NO   |     | NULL    |       |
+| creditos      | int(11)     | YES  |     | NULL    |       |
+| semestre      | int(11)     | YES  |     | NULL    |       |
+| area          | varchar(50) | NO   |     | NULL    |       |
+| clave_carrera | int(11)     | YES  |     | NULL    |       |
++---------------+-------------+------+-----+---------+-------+
+5 rows in set (0.0018 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > alter table carrera add constraint primary key ('clave_carrera');
+ERROR: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ''clave_carrera')' at line 1
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > alter table carrera add constraint primary key (clave_carrera);
+Query OK, 0 rows affected (1.9408 sec)
+
+Records: 0  Duplicates: 0  Warnings: 0
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > alter table carrea change clave_carrera clave_carrera int auto_increment;
+ERROR: 1146 (42S02): Table 'evaluacion_1.carrea' doesn't exist
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > alter table carrera change clave_carrera clave_carrera int auto_increment;
+Query OK, 0 rows affected (1.7843 sec)
+
+Records: 0  Duplicates: 0  Warnings: 0
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > desc carrera;
++---------------+-------------+------+-----+---------+----------------+
+| Field         | Type        | Null | Key | Default | Extra          |
++---------------+-------------+------+-----+---------+----------------+
+| nombre        | varchar(50) | NO   |     | NULL    |                |
+| creditos      | int(11)     | YES  |     | NULL    |                |
+| semestre      | int(11)     | YES  |     | NULL    |                |
+| area          | varchar(50) | NO   |     | NULL    |                |
+| clave_carrera | int(11)     | NO   | PRI | NULL    | auto_increment |
++---------------+-------------+------+-----+---------+----------------+
+5 rows in set (0.0019 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > desc materias;
++-----------------+--------------+------+-----+---------+-------+
+| Field           | Type         | Null | Key | Default | Extra |
++-----------------+--------------+------+-----+---------+-------+
+| nombre          | varchar(100) | NO   | PRI | NULL    |       |
+| creditos        | int(11)      | YES  |     | NULL    |       |
+| horas_teoricas  | int(11)      | YES  |     | NULL    |       |
+| horas_practicas | int(11)      | YES  |     | NULL    |       |
+| carrera         | varchar(3)   | YES  |     | NULL    |       |
+| semestre        | int(11)      | NO   | PRI | NULL    |       |
++-----------------+--------------+------+-----+---------+-------+
+6 rows in set (0.0018 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > alter table materias drop primary key;
+Query OK, 2 rows affected (2.0369 sec)
+
+Records: 2  Duplicates: 0  Warnings: 0
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > desc materias;
++-----------------+--------------+------+-----+---------+-------+
+| Field           | Type         | Null | Key | Default | Extra |
++-----------------+--------------+------+-----+---------+-------+
+| nombre          | varchar(100) | NO   |     | NULL    |       |
+| creditos        | int(11)      | YES  |     | NULL    |       |
+| horas_teoricas  | int(11)      | YES  |     | NULL    |       |
+| horas_practicas | int(11)      | YES  |     | NULL    |       |
+| carrera         | varchar(3)   | YES  |     | NULL    |       |
+| semestre        | int(11)      | NO   |     | NULL    |       |
++-----------------+--------------+------+-----+---------+-------+
+6 rows in set (0.0021 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > alter table materias add column clave_materia int;
+Query OK, 0 rows affected (0.8247 sec)
+
+Records: 0  Duplicates: 0  Warnings: 0
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > alter table materias add constraint primary key (clave_materias);
+ERROR: 1072 (42000): Key column 'clave_materias' doesn't exist in table
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > alter table materias add constraint primary key (clave_materia);
+ERROR: 1138 (22004): Invalid use of NULL value
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > desc materias;
++-----------------+--------------+------+-----+---------+-------+
+| Field           | Type         | Null | Key | Default | Extra |
++-----------------+--------------+------+-----+---------+-------+
+| nombre          | varchar(100) | NO   |     | NULL    |       |
+| creditos        | int(11)      | YES  |     | NULL    |       |
+| horas_teoricas  | int(11)      | YES  |     | NULL    |       |
+| horas_practicas | int(11)      | YES  |     | NULL    |       |
+| carrera         | varchar(3)   | YES  |     | NULL    |       |
+| semestre        | int(11)      | NO   |     | NULL    |       |
+| clave_materia   | int(11)      | YES  |     | NULL    |       |
++-----------------+--------------+------+-----+---------+-------+
+7 rows in set (0.0244 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > alter table materias add constraint primary key (clave_materia);
+ERROR: 1138 (22004): Invalid use of NULL value
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > alter table materias change clave_materia clave_materia int not null;
+ERROR: 1138 (22004): Invalid use of NULL value
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > alter table materias drop column clave_materia;
+Query OK, 0 rows affected (1.8102 sec)
+
+Records: 0  Duplicates: 0  Warnings: 0
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > desc materias;
++-----------------+--------------+------+-----+---------+-------+
+| Field           | Type         | Null | Key | Default | Extra |
++-----------------+--------------+------+-----+---------+-------+
+| nombre          | varchar(100) | NO   |     | NULL    |       |
+| creditos        | int(11)      | YES  |     | NULL    |       |
+| horas_teoricas  | int(11)      | YES  |     | NULL    |       |
+| horas_practicas | int(11)      | YES  |     | NULL    |       |
+| carrera         | varchar(3)   | YES  |     | NULL    |       |
+| semestre        | int(11)      | NO   |     | NULL    |       |
++-----------------+--------------+------+-----+---------+-------+
+6 rows in set (0.0017 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > alter table materias add column clave_materia int;
+Query OK, 0 rows affected (0.3328 sec)
+
+Records: 0  Duplicates: 0  Warnings: 0
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > desc materias;
++-----------------+--------------+------+-----+---------+-------+
+| Field           | Type         | Null | Key | Default | Extra |
++-----------------+--------------+------+-----+---------+-------+
+| nombre          | varchar(100) | NO   |     | NULL    |       |
+| creditos        | int(11)      | YES  |     | NULL    |       |
+| horas_teoricas  | int(11)      | YES  |     | NULL    |       |
+| horas_practicas | int(11)      | YES  |     | NULL    |       |
+| carrera         | varchar(3)   | YES  |     | NULL    |       |
+| semestre        | int(11)      | NO   |     | NULL    |       |
+| clave_materia   | int(11)      | YES  |     | NULL    |       |
++-----------------+--------------+------+-----+---------+-------+
+7 rows in set (0.0016 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > alter table materias add constraint primary key (clave_materia);
+ERROR: 1138 (22004): Invalid use of NULL value
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > select* from materias;
++-------------+----------+----------------+-----------------+---------+----------+---------------+
+| nombre      | creditos | horas_teoricas | horas_practicas | carrera | semestre | clave_materia |
++-------------+----------+----------------+-----------------+---------+----------+---------------+
+| matematicas |     NULL |           NULL |            NULL | NULL    |        1 |          NULL |
+| matematicas |     NULL |           NULL |            NULL | NULL    |        2 |          NULL |
++-------------+----------+----------------+-----------------+---------+----------+---------------+
+2 rows in set (0.0004 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > delete * from materiasM
+                                            ... ;
+ERROR: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '* from materiasM' at line 1
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > delete * from materias;
+ERROR: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '* from materias' at line 1
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > delete from materias;
+Query OK, 2 rows affected (0.1551 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > select* from materias;
+Empty set (0.0004 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > alter table materias add constraint primary key (clave_materia);
+Query OK, 0 rows affected (0.9894 sec)
+
+Records: 0  Duplicates: 0  Warnings: 0
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > alter table materias change clave_materia clave_materia int auto_increment;
+Query OK, 0 rows affected (1.7471 sec)
+
+Records: 0  Duplicates: 0  Warnings: 0
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > desc materias;
++-----------------+--------------+------+-----+---------+----------------+
+| Field           | Type         | Null | Key | Default | Extra          |
++-----------------+--------------+------+-----+---------+----------------+
+| nombre          | varchar(100) | NO   |     | NULL    |                |
+| creditos        | int(11)      | YES  |     | NULL    |                |
+| horas_teoricas  | int(11)      | YES  |     | NULL    |                |
+| horas_practicas | int(11)      | YES  |     | NULL    |                |
+| carrera         | varchar(3)   | YES  |     | NULL    |                |
+| semestre        | int(11)      | NO   |     | NULL    |                |
+| clave_materia   | int(11)      | NO   | PRI | NULL    | auto_increment |
++-----------------+--------------+------+-----+---------+----------------+
+7 rows in set (0.0020 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > insert into materias(nombre,semestre,clave_materia) values
+                                            ... (Bases de Datos,4;
+ERROR: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'de Datos,4' at line 2
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > insert into materias(nombre,semestre) values ('Bases de Datos',4),('Simulacion',5);
+Query OK, 2 rows affected (0.1505 sec)
+
+Records: 2  Duplicates: 0  Warnings: 0
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > select * from carrera;
+Empty set (0.0278 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > desc carrera;
++---------------+-------------+------+-----+---------+----------------+
+| Field         | Type        | Null | Key | Default | Extra          |
++---------------+-------------+------+-----+---------+----------------+
+| nombre        | varchar(50) | NO   |     | NULL    |                |
+| creditos      | int(11)     | YES  |     | NULL    |                |
+| semestre      | int(11)     | YES  |     | NULL    |                |
+| area          | varchar(50) | NO   |     | NULL    |                |
+| clave_carrera | int(11)     | NO   | PRI | NULL    | auto_increment |
++---------------+-------------+------+-----+---------+----------------+
+5 rows in set (0.0018 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > insert into carrera (nombre,area) values ('Sistemas Computacionales','Sistemas');
+Query OK, 1 row affected (0.1178 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > select * from estudiantes;
++------------+--------+------------------+------------------+-----------+------------------+------------------+-----------------+--------+-------------+
+| no_control | nombre | apellido_paterno | apellido_materno | direccion | fecha_nacimiento | lugar_nacimiento | pais_nacimiento | genero | no_telefono |
++------------+--------+------------------+------------------+-----------+------------------+------------------+-----------------+--------+-------------+
+| 16550477   | Carlos | NULL             | NULL             | NULL      | NULL             | NULL             | NULL            | NULL   | NULL        |
++------------+--------+------------------+------------------+-----------+------------------+------------------+-----------------+--------+-------------+
+1 row in set (0.0181 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > create table horarios(
+                                            ... clave_horario int auto_increment primary key,
+                                            ... no_control varchar(10),
+                                            ... clave_carrera int,
+                                            ... ;
+ERROR: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 4
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > create table horarios( clave_horario int auto_increment primary key, no_control varchar(10), clave_carrera int,
+                                            ... foreign key (no_control) references estudiantes(no_control) on update cascade on delete restrict,
+                                            ... foreign key (clave_carrera) references carrera(clave_carrera) on update cascade on delete restrict,
+                                            ... fecha datetime);
+ERROR: 1215 (HY000): Cannot add foreign key constraint
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > create table horarios(
+                                            ... clvae_horario int auto_increment primary key,
+                                            ... no_control varchar(10),
+                                            ... clave_carrera int,
+                                            ... fecha datetime,
+                                            ... foreign key (no_control) references estudiantes(no_control) on update cascade on delete restrict,
+                                            ... foreign key (cla;
+ERROR: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 7
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > create table horarios(
+                                            ... clave_horario int auto_increment primary key,
+                                            ... no_control varchar(10),
+                                            ... clave_carrera int,
+                                            ... fecha datetime,
+                                            ... foreign key (no_control) references estudiantes(no_control) on update cascade on delete restrict,
+                                            ... foreign key (clave_carrera) references carrera(clave_carrera) on update cascade on delete restrict);
+ERROR: 1215 (HY000): Cannot add foreign key constraint
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > create table horarios( clave_horario int auto_increment primary key, no_control varchar(10) not null, clave_carrera int, fecha datetime, foreign key (no_control) references estudiantes(no_control) on update cascade on delete restrict, foreign key (clave_carrera) references carrera(clave_carrera) on update cascade on delete restrict);
+ERROR: 1215 (HY000): Cannot add foreign key constraint
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL >
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > create table horario_detalle(
+                                            ... clave_detalle int auto_increment primary key,
+                                            ... clave_horario int,
+                                            ... clave_materia int,
+                                            ... hora time,
+                                            ... salon varchar(10),
+                                            ... foreign key (clave_horario) references horarios(clave_horario) on update cascade on delete cascade,
+                                            ... foreign key (clave_materia) references materias(clave_materia) on update cascade on delete cascade);
+Query OK, 0 rows affected (0.9335 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > desc horario_detalles;
+ERROR: 1146 (42S02): Table 'evaluacion_1.horario_detalles' doesn't exist
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL > desc horario_detalle;
++---------------+-------------+------+-----+---------+----------------+
+| Field         | Type        | Null | Key | Default | Extra          |
++---------------+-------------+------+-----+---------+----------------+
+| clave_detalle | int(11)     | NO   | PRI | NULL    | auto_increment |
+| clave_horario | int(11)     | YES  | MUL | NULL    |                |
+| clave_materia | int(11)     | YES  | MUL | NULL    |                |
+| hora          | time        | YES  |     | NULL    |                |
+| salon         | varchar(10) | YES  |     | NULL    |                |
++---------------+-------------+------+-----+---------+----------------+
+5 rows in set (0.0026 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_1  SQL >
